@@ -1,4 +1,3 @@
-// script.js
 const chessboard = document.getElementById('chessboard');
 const resetButton = document.getElementById('reset-button');
 const blackCaptured = document.getElementById('black-pieces');
@@ -21,12 +20,14 @@ let selectedSquare = null;
 let capturedBlackPieces = [];
 let capturedWhitePieces = [];
 let isWhiteTurn = true;
+let gameActive = true;
 
 function initializeBoard() {
   currentBoard = JSON.parse(JSON.stringify(initialBoard));
   capturedBlackPieces = [];
   capturedWhitePieces = [];
   isWhiteTurn = true;
+  gameActive = true;
   updateCapturedPieces();
   renderBoard();
   updateTurnIndicator();
@@ -48,6 +49,8 @@ function renderBoard() {
 }
 
 function handleSquareClick(row, col) {
+  if (!gameActive) return; // Prevent further moves if the game is over
+
   if (selectedSquare) {
     movePiece(selectedSquare, { row, col });
     selectedSquare = null;
@@ -75,6 +78,12 @@ function movePiece(from, to) {
       capturedBlackPieces.push(targetPiece);
     }
     updateCapturedPieces();
+
+    // Check if the captured piece is a king
+    if (targetPiece === "♔" || targetPiece === "♚") {
+      endGame(targetPiece === "♔" ? "Black" : "White");
+      return;
+    }
   }
 
   currentBoard[from.row][from.col] = null;
@@ -91,6 +100,11 @@ function updateCapturedPieces() {
 
 function updateTurnIndicator() {
   turnIndicator.textContent = `Current Turn: ${isWhiteTurn ? 'White' : 'Black'}`;
+}
+
+function endGame(winner) {
+  gameActive = false; // Stop further moves
+  alert(`Game Over! ${winner} wins!`);
 }
 
 resetButton.addEventListener('click', initializeBoard);
